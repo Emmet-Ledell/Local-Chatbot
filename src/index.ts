@@ -3,6 +3,8 @@
 import Ollama from "ollama";
 
 import * as fs from "fs";
+import { createInterface } from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
 
 // interface ChatRequest {
 //     model: string;
@@ -25,7 +27,20 @@ import * as fs from "fs";
 // }
 
 async function generateText() {
+  const rl = createInterface({ input, output });
+
   try {
+    const questionText = await rl.question("Enter your question: ");
+
+    while (true) {
+      const answer = await rl.question(`${questionText} `);
+
+      if (answer.trim().toLowerCase() === "/close") {
+        console.log("Bye!");
+        break;
+      }
+    }
+
     const initialMessage = [
       {
         role: "user",
