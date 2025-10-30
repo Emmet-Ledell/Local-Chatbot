@@ -16,6 +16,38 @@ import { stdin as input, stdout as output } from "node:process";
 //     think?: boolean | 'high' | 'medium' | 'low';
 //     options?: Partial<Options>;
 // }
+// interface Options {
+//   numa: boolean;
+//   num_ctx: number;
+//   num_batch: number;
+//   num_gpu: number;
+//   main_gpu: number;
+//   low_vram: boolean;
+//   f16_kv: boolean;
+//   logits_all: boolean;
+//   vocab_only: boolean;
+//   use_mmap: boolean;
+//   use_mlock: boolean;
+//   embedding_only: boolean;
+//   num_thread: number;
+//   num_keep: number;
+//   seed: number;
+//   num_predict: number;
+//   top_k: number;
+//   top_p: number;
+//   tfs_z: number;
+//   typical_p: number;
+//   repeat_last_n: number;
+//   temperature: number;
+//   repeat_penalty: number;
+//   presence_penalty: number;
+//   frequency_penalty: number;
+//   mirostat: number;
+//   mirostat_tau: number;
+//   mirostat_eta: number;
+//   penalize_newline: boolean;
+//   stop: string[];
+// }
 
 // interface Message {
 //     role: string;
@@ -28,32 +60,41 @@ import { stdin as input, stdout as output } from "node:process";
 
 async function generateText() {
   const rl = createInterface({ input, output });
+  let messagelogs = [
+    {
+      role: "system",
+      content:
+        "you are a helpful ai chatbot, do your best to answer the users questions. In your responses don't bother with line breaks, the outputs are going to a terminal console. You're responses are role: 'system', the users are role:user",
+    },
+  ];
 
   try {
-    const questionText = await rl.question("Enter your question: ");
-
     while (true) {
-      const answer = await rl.question(`${questionText} `);
+      const question = await rl.question(`Enter your question: `);
 
-      if (answer.trim().toLowerCase() === "/close") {
+      if (question.trim().toLowerCase() === "/close") {
         console.log("Bye!");
+        rl.close();
         break;
       }
-    }
+      messagelogs.push({ role: "user", content: `${question}` });
 
-    const initialMessage = [
-      {
-        role: "user",
-        content: "Two + Two ",
-      },
-    ];
-    const response = await Ollama.chat({
-      model: "llama3.1:8b",
-      think: false,
-      messages: initialMessage,
-    });
-    const messageresponse = JSON.stringify(response);
-    console.table(messageresponse);
+      const response = await Ollama.chat({
+        model: "llama3.1:8b",
+        think: false,
+        messages: messagelogs,
+        options: {
+          num_ctx: 4096,
+          temperature: 0.2,
+        },
+      });
+      const llamaResponse = response.message.content;
+      console.log(llamaResponse);
+      messagelogs.push({
+        role: "assistant",
+        content: `${llamaResponse}`,
+      });
+    }
   } catch (error) {
     console.error("Error generating text:", error);
   }
