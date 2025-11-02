@@ -12,7 +12,8 @@ def writeFile(file_path, content):
     with open(file_path, "a") as f:
         f.write(content)
 
-# need to add ACtual Sentence aware chunking and L2 Normalization, later though, want to see this whole thing come together first
+# need to add ACtual Sentence aware chunking and optimize the embedding, prolly just batch embed and hook them up with the meta data later,
+# later though, want to see this whole thing come together first
 
 def process_files_in_folder(folder_path):
     open(writePath, "w").close()
