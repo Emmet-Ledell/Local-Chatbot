@@ -5,7 +5,6 @@ import json
 
 modelName = "BAAI/bge-base-en-v1.5"
 model = FlagAutoModel.from_finetuned(modelName,
-query_instruction_for_retrieval="Represent this sentence for searching relevant passages:", 
 use_fp16=True)
 writePath = "data/result.json"
 
@@ -15,11 +14,10 @@ def writeFile(file_path, content):
         f.write(content)
 
 
-
+# need to add ACtual Sentence aware chunking
 def process_files_in_folder(folder_path):
     open(writePath, "w").close()
     arr = []
-
     try:
         for entry_name in os.listdir(folder_path):
             full_path = os.path.join(folder_path, entry_name)
@@ -33,16 +31,16 @@ def process_files_in_folder(folder_path):
 
                 i = 0
                 while i < len(content):
-                    chunk = content[i:min(i + 800, len(content))]
+                    chunk = content[i:min(i + 1500, len(content))]
                     embeddings = model.encode(chunk)
                     record = {
                         "sourceFile": entry_name,
                         "embedding": embeddings.tolist(),
                         "nameofmodel": modelName,
-                        "characterRange": [i, min(i + 800, len(content))]
+                        "characterRange": [i, min(i + 1500, len(content))]
                     }
                     arr.append(record)
-                    i += 700
+                    i += 1350
 
             except Exception as e:
                 print(f"Error processing {entry_name}: {e}")
@@ -53,7 +51,6 @@ def process_files_in_folder(folder_path):
 
 folder_to_process = 'notes' 
 process_files_in_folder(folder_to_process)
-
 
 
 # similarity = embeddings_1 @ embeddings_2.T
