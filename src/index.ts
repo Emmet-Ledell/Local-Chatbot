@@ -6,16 +6,29 @@ import * as fs from "fs";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 
-// interface ChatRequest {
-//     model: string;
-//     messages?: Message[];
-//     stream?: boolean;
-//     format?: string | object;
-//     keep_alive?: string | number;
-//     tools?: Tool[];
-//     think?: boolean | 'high' | 'medium' | 'low';
-//     options?: Partial<Options>;
+// interface Tool {
+//   type: string;
+//   function: {
+//     name?: string;
+//     description?: string;
+//     type?: string;
+//     parameters?: {
+//       type?: string;
+//       $defs?: any;
+//       items?: any;
+//       required?: string[];
+//       properties?: {
+//         [key: string]: {
+//           type?: string | string[];
+//           items?: any;
+//           description?: string;
+//           enum?: any[];
+//         };
+//       };
+//     };
+//   };
 // }
+
 // interface Options {
 //   numa: boolean;
 //   num_ctx: number;
@@ -50,13 +63,23 @@ import { stdin as input, stdout as output } from "node:process";
 // }
 
 // interface Message {
-//     role: string;
-//     content: string;
-//     thinking?: string;
-//     images?: Uint8Array[] | string[];
-//     tool_calls?: ToolCall[];
-//     tool_name?: string;
+//   role: string;
+//   content: string;
+//   thinking?: string;
+//   images?: Uint8Array[] | string[];
+//   tool_calls?: ToolCall[];
+//   tool_name?: string;
 // }
+
+// interface ToolCall {
+//   function: {
+//     name: string;
+//     arguments: {
+//       [key: string]: any;
+//     };
+//   };
+// }
+//gpt-oss:20b, llama3.1:8b
 
 async function generateText() {
   const rl = createInterface({ input, output });
@@ -80,8 +103,9 @@ async function generateText() {
       messagelogs.push({ role: "user", content: `${question}` });
 
       const response = await Ollama.chat({
-        model: "llama3.1:8b",
+        model: "gpt-oss:20b",
         think: false,
+        stream: false,
         messages: messagelogs,
         options: {
           num_ctx: 4096,
