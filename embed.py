@@ -4,8 +4,7 @@ import json
 
 
 modelName = "BAAI/bge-base-en-v1.5"
-model = FlagAutoModel.from_finetuned(modelName,
-use_fp16=True)
+model = FlagAutoModel.from_finetuned(modelName, use_fp16=True)
 writePath = "data/result.json"
 
 
@@ -13,8 +12,8 @@ def writeFile(file_path, content):
     with open(file_path, "a") as f:
         f.write(content)
 
+# need to add ACtual Sentence aware chunking and L2 Normalization, later though, want to see this whole thing come together first
 
-# need to add ACtual Sentence aware chunking
 def process_files_in_folder(folder_path):
     open(writePath, "w").close()
     arr = []
@@ -35,6 +34,7 @@ def process_files_in_folder(folder_path):
                     embeddings = model.encode(chunk)
                     record = {
                         "sourceFile": entry_name,
+                        "text": content[i:min(i + 1500, len(content))],
                         "embedding": embeddings.tolist(),
                         "nameofmodel": modelName,
                         "characterRange": [i, min(i + 1500, len(content))]
@@ -51,6 +51,5 @@ def process_files_in_folder(folder_path):
 
 folder_to_process = 'notes' 
 process_files_in_folder(folder_to_process)
-
 
 # similarity = embeddings_1 @ embeddings_2.T
