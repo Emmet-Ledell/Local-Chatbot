@@ -5,6 +5,7 @@ import Ollama from "ollama";
 import * as fs from "fs";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
+import { spawn } from "child_process";
 
 // interface Tool {
 //   type: string;
@@ -100,6 +101,36 @@ async function generateText() {
         rl.close();
         break;
       }
+      if (question.trim().toLowerCase().startsWith("/search")) {
+        try {
+          const pythonScript = "src/retriever.py";
+          const embedQuery = question.split("/search")[1] || "";
+
+          const pythonProcess = spawn("python3", [pythonScript, embedQuery]);
+          let fullOutput = "";
+
+          // When Python prints something
+          pythonProcess.stdout.on("data", (data) => {
+            const text = data.toString();
+            fullOutput += text;
+            console.log(`Python stdout: ${text}`);
+          });
+
+          //error catcher
+          pythonProcess.stderr.on("data", (data) => {
+            console.error(`Python stderr: ${data}`);
+          });
+
+          // When the Python process finishes
+          pythonProcess.on("close", (code) => {
+          });
+
+          rl.close();
+          break;
+        } catch (error) {
+          console.log(error);
+        }
+      }
       messagelogs.push({ role: "user", content: `${question}` });
 
       const response = await Ollama.chat({
@@ -112,6 +143,7 @@ async function generateText() {
           temperature: 0.2,
         },
       });
+
       const llamaResponse = response.message.content;
       console.log(llamaResponse);
       messagelogs.push({
