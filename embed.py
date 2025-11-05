@@ -59,4 +59,3 @@ def process_files_in_folder(folder_path):
 folder_to_process = 'notes' 
 process_files_in_folder(folder_to_process)
 
-# similarity = embeddings_1 @ embeddings_2.T

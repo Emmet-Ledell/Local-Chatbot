@@ -80,7 +80,6 @@ import { spawn } from "child_process";
 //     };
 //   };
 // }
-//gpt-oss:20b, llama3.1:8b
 
 async function generateText() {
   const rl = createInterface({ input, output });
@@ -134,7 +133,7 @@ async function generateText() {
       messagelogs.push({ role: "user", content: `${question}` });
 
       const response = await Ollama.chat({
-        model: "gpt-oss:20b",
+        model: "llama3.1:8b", //gpt-oss:20b, llama3.1:8b
         think: false,
         stream: false,
         messages: messagelogs,

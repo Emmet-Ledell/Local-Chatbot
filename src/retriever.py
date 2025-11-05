@@ -21,11 +21,9 @@ import json
 
 
 modelName = "BAAI/bge-base-en-v1.5"
-model = FlagAutoModel.from_finetuned(modelName, use_fp16=True,query_instruction_for_retrieval="Represent this sentence for searching relevant passages:")
+model = FlagAutoModel.from_finetuned(modelName, use_fp16=True)
 readPath = './data/result.json'
 
-# similarity = embeddings_1 @ embeddings_2.T
-# print(similarity)
 
 if __name__ == "__main__":
 
