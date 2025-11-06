@@ -37,8 +37,15 @@ def search(body: dict):
     for x in datatext:
         similarity = queryembed @ x["embedding"]
         print(similarity)
-        arr.append((similarity, x["uuid"], x["sourceFile"]))
-    arr.sort(key=lambda x: x[0], reverse=True )
+        arr.append({
+        "similarity": similarity,
+        "uuid": x["uuid"],
+        "sourceFile": x["sourceFile"],
+        "text": x["text"]
+    })
+
+    
+    arr.sort(key=lambda x: x["similarity"], reverse=True)
     return {"results": arr[:5]}
 
 if __name__ == "__main__":

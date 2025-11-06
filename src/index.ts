@@ -7,11 +7,19 @@ import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { spawn } from "child_process";
 
-const pythonProcess = spawn("python3", ["src/retriever.py"]);
+const pythonScript = "src/retriever.py";
+
+const pythonProcess = spawn("python3", [pythonScript]);
 
 pythonProcess.stdout.on("data", (data) => {
   const text = data.toString();
 });
+
+type DeadRes = {
+  results: [
+    { similarity: number; uuid: number; sourceFile: string; text: string }
+  ];
+};
 
 async function generateText() {
   const rl = createInterface({ input, output });
@@ -25,6 +33,7 @@ async function generateText() {
 
   try {
     while (true) {
+      let flag = false;
       const question = await rl.question(`Enter your question: `);
 
       if (question.trim().toLowerCase() === "/close") {
@@ -34,28 +43,44 @@ async function generateText() {
       }
       if (question.trim().toLowerCase().startsWith("/search")) {
         try {
-          const pythonScript = "src/retriever.py";
+          flag = true;
           const embedQuery = question.split("/search")[1] || "";
-
           const res = await fetch("http://127.0.0.1:8000/search", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ query: embedQuery }),
           });
-          const data = await res.json();
-          // if (typeof data !== "string") {
-          //   return;
-          // }
-          console.log("PYTHON REPOSNE \n", data);
-          // const a = JSON.parse(data);
-
-          rl.close();
-          break;
+          const data = (await res.json()) as DeadRes;
+          // console.log("PYTHON REPOSNE \n", data.results);
+          messagelogs.push({
+            role: "system",
+            content: `
+          You are a retrieval-augmented assistant. The user asked: "${embedQuery}".
+          Use only the information from the provided JSON data to answer. 
+          
+          The JSON will contain objects in this format:
+          [
+            { similarity: number, uuid: number, sourceFile: string, text: string }
+          ]
+          
+          Instructions:
+          - If the answer is clearly supported by one or more "text" fields, answer concisely and cite the corresponding sourceFile(s).
+          - If the information is not found or cannot be inferred from the JSON, reply with "I don't know."
+          - Do not fabricate or use outside knowledge.
+          - Respond naturally and directly to the user's question.
+          
+          JSON data:
+          ${JSON.stringify(data)}
+          `,
+          });
         } catch (error) {
           console.log(error);
         }
       }
-      messagelogs.push({ role: "user", content: `${question}` });
+
+      if (!flag) {
+        messagelogs.push({ role: "user", content: `${question}` });
+      }
 
       const response = await Ollama.chat({
         model: "llama3.1:8b", //gpt-oss:20b, llama3.1:8b
