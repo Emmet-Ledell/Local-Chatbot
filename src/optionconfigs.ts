@@ -189,3 +189,81 @@ const fastChatPreset: Options = {
   penalize_newline: false,
   stop: ["User:", "Assistant:"],
 };
+
+
+
+
+
+// interface Tool {
+//   type: string;
+//   function: {
+//     name?: string;
+//     description?: string;
+//     type?: string;
+//     parameters?: {
+//       type?: string;
+//       $defs?: any;
+//       items?: any;
+//       required?: string[];
+//       properties?: {
+//         [key: string]: {
+//           type?: string | string[];
+//           items?: any;
+//           description?: string;
+//           enum?: any[];
+//         };
+//       };
+//     };
+//   };
+// }
+
+// interface Options {
+//   numa: boolean;
+//   num_ctx: number;
+//   num_batch: number;
+//   num_gpu: number;
+//   main_gpu: number;
+//   low_vram: boolean;
+//   f16_kv: boolean;
+//   logits_all: boolean;
+//   vocab_only: boolean;
+//   use_mmap: boolean;
+//   use_mlock: boolean;
+//   embedding_only: boolean;
+//   num_thread: number;
+//   num_keep: number;
+//   seed: number;
+//   num_predict: number;
+//   top_k: number;
+//   top_p: number;
+//   tfs_z: number;
+//   typical_p: number;
+//   repeat_last_n: number;
+//   temperature: number;
+//   repeat_penalty: number;
+//   presence_penalty: number;
+//   frequency_penalty: number;
+//   mirostat: number;
+//   mirostat_tau: number;
+//   mirostat_eta: number;
+//   penalize_newline: boolean;
+//   stop: string[];
+// }
+
+// interface Message {
+//   role: string;
+//   content: string;
+//   thinking?: string;
+//   images?: Uint8Array[] | string[];
+//   tool_calls?: ToolCall[];
+//   tool_name?: string;
+// }
+
+// interface ToolCall {
+//   function: {
+//     name: string;
+//     arguments: {
+//       [key: string]: any;
+//     };
+//   };
+// }

@@ -14,31 +14,32 @@
 # Cross-encoder reranker (bge-reranker-base)
 # Top 3–5 sent to LLM context
 
+
+from fastapi import FastAPI
+import uvicorn
 from FlagEmbedding import FlagAutoModel
-import os
-import sys
 import json
 
+app = FastAPI()
+model = FlagAutoModel.from_finetuned("BAAI/bge-base-en-v1.5", use_fp16=True)
+readPath = "./data/result.json"
 
-modelName = "BAAI/bge-base-en-v1.5"
-model = FlagAutoModel.from_finetuned(modelName, use_fp16=True)
-readPath = './data/result.json'
+@app.post("/search")
+def search(body: dict):
+    query = body.get("query", "")
+    print("query", query)
 
+    with open(readPath) as f:
+        datatext = json.load(f)
+    
+    queryembed = model.encode(query)
+    arr = []
+    for x in datatext:
+        similarity = queryembed @ x["embedding"]
+        print(similarity)
+        arr.append((similarity, x["uuid"], x["sourceFile"]))
+    arr.sort(key=lambda x: x[0], reverse=True )
+    return {"results": arr[:5]}
 
 if __name__ == "__main__":
-
-    print("hello")
-    if len(sys.argv) > 1:
-            f = open(readPath)
-            datatext = json.loads(f.read())
-            queryembed = model.encode(sys.argv[1])
-            arr = []
-
-            for x in datatext:
-                similarity = queryembed @ x["embedding"]
-                arr.append((similarity, x["uuid"], x["sourceFile"]))
-            arr.sort(key=lambda x: x[0], reverse=True )
-            print(arr[:5])
-            f.close()
-    else:
-        print("Please provide a name.")
+    uvicorn.run(app, host="127.0.0.1", port=8000)
